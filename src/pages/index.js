@@ -1,29 +1,74 @@
 import * as React from "react"
-import { Link } from "gatsby"
-import { StaticImage } from "gatsby-plugin-image"
-
+import { graphql } from 'gatsby'
 import Layout from "../components/layout"
+import Hero from "../components/hero"
+import Projects from "../components/projects"
 import Seo from "../components/seo"
+import Blogs from "../components/blogs"
+import Services from "../components/services"
+import ContactForm from "../components/contactForm"
 
-const IndexPage = () => (
-  <Layout>
-    <Seo title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <StaticImage
-      src="../images/gatsby-astronaut.png"
-      width={300}
-      quality={95}
-      formats={["AUTO", "WEBP", "AVIF"]}
-      alt="A Gatsby astronaut"
-      style={{ marginBottom: `1.45rem` }}
-    />
-    <p>
-      <Link to="/page-2/">Go to page 2</Link> <br />
-      <Link to="/using-typescript/">Go to "Using TypeScript"</Link>
-    </p>
-  </Layout>
-)
+const IndexPage = ({ data }) => {
+  const { allStrapiProjects: { nodes: projects }, allStrapiBlogs: { nodes: blogs } } = data
+
+  return (
+    <Layout>
+      <Seo title="Home" />
+      <Hero />
+      <div className="divider"></div>
+      <Services />
+      <div className="divider"></div>
+      <Projects projects={projects} title="featured project" showLink />
+      <div className="divider"></div>
+      <Blogs blogs={blogs} title="Latest Articles" showLink />
+      <div className="divider"></div>
+      <ContactForm />
+    </Layout>
+  )
+}
+
+export const query = graphql`
+  {
+    allStrapiProjects(filter: {featured: {eq: true}}) {
+      nodes {
+        id
+        description
+        title
+        slug
+        image {
+          localFile {
+            childImageSharp {
+              gatsbyImageData(
+                layout: FULL_WIDTH
+                placeholder: BLURRED
+              )
+            }
+          }
+        }
+        feature {
+          id
+          title
+        }
+      }
+    }
+    allStrapiBlogs(sort: {fields: date, order: DESC}, limit: 3) {
+      nodes {
+        slug
+        description
+        date(formatString: "MMM Do, YYYY")
+        title
+        id
+        category
+        image {
+          localFile {
+            childImageSharp {
+              gatsbyImageData
+            }
+          }
+        }
+      }
+    }
+  }
+`
 
 export default IndexPage
